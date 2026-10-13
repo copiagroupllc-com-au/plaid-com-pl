@@ -1,16 +1,16 @@
 import ContactForm from "../components/ContactForm";
 import { useLanguage } from "../context/LanguageContext";
 
-const CALENDLY_URL = "https://calendly.com/copia-hiring";
+const CALENDLY_URL = "https://calendly.com/plaid-hiring";
 
 export default function Contact() {
   const { t } = useLanguage();
 
   const contactDetails = [
-    { icon:"✉️", labelKey:"contact_email_lbl",   value:"contact@copiagroupllc.com.pl", href:"mailto:contact@copiagroupllc.com.pl" },
-    { icon:"🌐", labelKey:"contact_website_lbl", value:"copiagroupllc.com.pl",          href:"https://copiagroupllc.com.pl" },
-    { icon:"🏢", labelKey:"contact_hq_lbl",      value:t("contact_hq_val"),             href:null },
-    { icon:"🔗", labelKey:"contact_parent_lbl",  value:"copiagroupllc.com",             href:"https://copiagroupllc.com" },
+    { icon:"✉️", labelKey:"contact_email_lbl",   value:"contact@plaid.com.pl",  href:"mailto:contact@plaid.com.pl" },
+    { icon:"🌐", labelKey:"contact_website_lbl", value:"plaid.com.pl",           href:"https://plaid.com.pl" },
+    { icon:"🏢", labelKey:"contact_hq_lbl",      value:t("contact_hq_val"),     href:null },
+    { icon:"🔗", labelKey:"contact_parent_lbl",  value:"plaid.com",             href:"https://plaid.com" },
   ];
 
   return (

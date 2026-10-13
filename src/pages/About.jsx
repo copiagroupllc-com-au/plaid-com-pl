@@ -1,15 +1,6 @@
 import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 
-const valueKeys = [
-  { icon:"🔭", tk:"val1_title", dk:"val1_desc" },
-  { icon:"🤝", tk:"val2_title", dk:"val2_desc" },
-  { icon:"⚡", tk:"val3_title", dk:"val3_desc" },
-  { icon:"🌏", tk:"val4_title", dk:"val4_desc" },
-  { icon:"🔗", tk:"val5_title", dk:"val5_desc" },
-  { icon:"♻️", tk:"val6_title", dk:"val6_desc" },
-];
-
 const milestones = [
   { year:"2019", mk:"ms_2019" },
   { year:"2022", mk:"ms_2022" },
@@ -38,7 +29,7 @@ export default function About() {
             <div>
               <h2 className="text-4xl font-bold text-white mb-6 font-display">{t("about_story_h2")}</h2>
               <div className="space-y-4 text-gray-400 leading-relaxed">
-                <p>{t("about_story_p1")}{" "}<a href="https://copiagroupllc.com" target="_blank" rel="noopener noreferrer" className="text-[#DC2626] hover:underline">Copia Group LLC</a>{t("about_story_p1b")}</p>
+                <p>{t("about_story_p1")}{" "}<a href="https://plaid.com" target="_blank" rel="noopener noreferrer" className="text-[#DC2626] hover:underline">Plaid Inc.</a>{t("about_story_p1b")}</p>
                 <p>{t("about_story_p2")}</p>
                 <p>{t("about_story_p3")}</p>
               </div>
@@ -55,24 +46,6 @@ export default function About() {
                 <p className="text-gray-400 leading-relaxed">{t("about_vision_p")}</p>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-24 bg-[#111118]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <p className="text-[#DC2626] text-xs font-semibold tracking-widest uppercase mb-3">{t("about_values_lbl")}</p>
-            <h2 className="text-4xl font-bold text-white font-display">{t("about_values_h2")}</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {valueKeys.map(({ icon, tk, dk }) => (
-              <div key={tk} className="p-8 rounded-2xl border border-white/8 bg-[#16161F] hover:border-[#DC2626]/30 transition-colors group">
-                <div className="text-3xl mb-4">{icon}</div>
-                <h3 className="text-base font-bold text-white mb-2 group-hover:text-[#DC2626] transition-colors font-display">{t(tk)}</h3>
-                <p className="text-gray-500 text-sm leading-relaxed">{t(dk)}</p>
-              </div>
-            ))}
           </div>
         </div>
       </section>

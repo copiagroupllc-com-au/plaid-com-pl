@@ -4,36 +4,36 @@ import ServicePreview from "../components/ServicePreview";
 import { useLanguage } from "../context/LanguageContext";
 
 const servicesData = [
-  { previewUrl:"https://midas.app",          accent:"#DC2626",
-    title_pl:"Inwestycje",        title_en:"Investment",
-    desc_pl:"Strategiczna alokacja kapitału na globalnych rynkach z analizą opartą na AI i zarządzaniem ryzykiem.",
-    desc_en:"Strategic capital allocation across global markets with AI-driven insight and risk management.",
-    to:"/services#investment" },
-  { previewUrl:"https://stripe.com",          accent:"#DC2626",
-    title_pl:"Fintech i płatności", title_en:"Fintech & Payments",
-    desc_pl:"Infrastruktura płatnicza nowej generacji — szybka, bezpieczna i bezgraniczna jak Stripe dla ery Web3.",
-    desc_en:"Next-generation payment infrastructure — fast, secure, and borderless like Stripe for the Web3 era.",
-    to:"/services#fintech" },
-  { previewUrl:"https://0g.ai",               accent:"#DC2626",
-    title_pl:"Web3 i blockchain",  title_en:"Web3 & Blockchain",
-    desc_pl:"Zdecentralizowane aplikacje, smart kontrakty i ekosystemy tokenów tworzone dla realnych zastosowań.",
-    desc_en:"Decentralised applications, smart contracts, and token ecosystems built for real-world adoption.",
-    to:"/services#web3" },
-  { previewUrl:"https://akash.network",        accent:"#DC2626",
-    title_pl:"Rozwiązania AI",     title_en:"AI Solutions",
-    desc_pl:"Inteligentna automatyzacja i analityka predykcyjna dające Twojej firmie przewagę konkurencyjną.",
-    desc_en:"Intelligent automation and predictive analytics that give your business a competitive edge.",
-    to:"/services#ai" },
-  { previewUrl:"https://www.blocksquare.io",   accent:"#DC2626",
-    title_pl:"Nieruchomości",      title_en:"Real Estate",
-    desc_pl:"Tokenizacja nieruchomości i cyfrowe inwestycje w nieruchomości na rynku polskim.",
-    desc_en:"Tokenised real estate development and digital property investment for the Polish market.",
-    to:"/services#real-estate" },
-  { previewUrl:"https://xter.io",              accent:"#DC2626",
-    title_pl:"Gaming Web3",        title_en:"Web3 Gaming",
-    desc_pl:"Platformy play-to-earn i own-to-earn ze zintegrowaną mechaniką DeFi i ekonomiami NFT.",
-    desc_en:"Play-to-earn and own-to-earn gaming platforms with integrated DeFi mechanics and NFT economies.",
-    to:"/services#gaming" },
+  { previewUrl:"https://plaid.com/products/auth/",          accent:"#DC2626",
+    title_pl:"Łączność z kontem",   title_en:"Account Connectivity",
+    desc_pl:"Bezpieczne połączenie z ponad 12 000 instytucji finansowych — weryfikacja konta i salda w czasie rzeczywistym.",
+    desc_en:"Securely connect to 12,000+ financial institutions — real-time account and balance verification.",
+    to:"/services#account-connectivity" },
+  { previewUrl:"https://plaid.com/products/transfer/",       accent:"#DC2626",
+    title_pl:"Płatności", title_en:"Payments",
+    desc_pl:"Infrastruktura transferów bankowych z wbudowaną oceną ryzyka — szybkie, bezpieczne przelewy ACH i bankowe.",
+    desc_en:"Bank transfer infrastructure with built-in risk scoring — fast, reliable ACH and bank payment flows.",
+    to:"/services#payments" },
+  { previewUrl:"https://plaid.com/products/identity-verification/", accent:"#DC2626",
+    title_pl:"Weryfikacja tożsamości",  title_en:"Identity Verification",
+    desc_pl:"Weryfikacja dokumentów, liveness detection i dane bankowe w jednym przepływie KYC.",
+    desc_en:"Document checks, liveness detection, and bank data combined into a single KYC onboarding flow.",
+    to:"/services#identity" },
+  { previewUrl:"https://plaid.com/products/monitor/",        accent:"#DC2626",
+    title_pl:"Zapobieganie oszustwom",  title_en:"Fraud & Risk",
+    desc_pl:"Screening watchlistów AML, wykrywanie przejęcia konta i ocena ryzyka oparta na danych finansowych.",
+    desc_en:"AML watchlist screening, account takeover detection, and financial data-driven risk scoring.",
+    to:"/services#fraud" },
+  { previewUrl:"https://plaid.com/products/transactions/",   accent:"#DC2626",
+    title_pl:"Zarządzanie finansami",   title_en:"Financial Management",
+    desc_pl:"Do 24 miesięcy skategoryzowanych danych transakcyjnych i portfelowych dla narzędzi budżetowania i majątku.",
+    desc_en:"Up to 24 months of categorised transaction and portfolio data for budgeting and wealth management tools.",
+    to:"/services#financial-management" },
+  { previewUrl:"https://plaid.com/use-cases/open-finance/",  accent:"#DC2626",
+    title_pl:"Otwarte finanse",         title_en:"Open Finance",
+    desc_pl:"Platforma open finance zgodna z PSD2 i Section 1033 — permisywne udostępnianie danych z zarządzaniem zgodą.",
+    desc_en:"PSD2 & Section 1033-ready open finance platform — permissioned data sharing with consent management.",
+    to:"/services#open-finance" },
 ];
 
 export default function Home() {
@@ -135,7 +135,7 @@ export default function Home() {
               </h2>
               <p className="text-gray-400 text-lg leading-relaxed mb-6">
                 {t("home_about_p")}{" "}
-                <a href="https://copiagroupllc.com" target="_blank" rel="noopener noreferrer" className="text-[#DC2626] hover:underline">Copia Group LLC</a>
+                <a href="https://plaid.com" target="_blank" rel="noopener noreferrer" className="text-[#DC2626] hover:underline">Plaid Inc.</a>
                 {t("home_about_p2")}
               </p>
               <Link to="/about" className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#DC2626] text-white font-bold hover:bg-[#EF4444] transition-colors">

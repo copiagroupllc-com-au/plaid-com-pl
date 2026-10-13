@@ -2,20 +2,20 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
 
 const team = [
-  { name:"Nick Field",           role:"Managing Director",            photo:"/team/nick-field.png",           accent:"#DC2626" },
-  { name:"Andy Fordyce",         role:"Project Manager",              photo:"/team/andy-fordyce.png",         accent:"#EF4444" },
-  { name:"Cezar Torescu",        role:"Product Engineering Manager",  photo:"/team/cezar-torescu.png",        accent:"#B91C1C" },
-  { name:"Jake Malliaros",       role:"Senior Product Manager",       photo:"/team/jake-malliaros.png",       accent:"#DC2626" },
-  { name:"Fabian Stierle",       role:"Senior Business Consultant",   photo:"/team/fabian-stierle.png",       accent:"#EF4444" },
-  { name:"Jori Lope",            role:"Senior Business Consultant",   photo:"/team/jori-lope.png",            accent:"#B91C1C" },
-  { name:"Mykhailo Plametiu",    role:"Senior Business Manager",      photo:"/team/mykhailo-plametiu.png",    accent:"#DC2626" },
-  { name:"Oleh Kopeichenko",     role:"Senior Business Manager",      photo:"/team/oleh-kopeichenko.png",     accent:"#EF4444" },
-  { name:"Yaroslav Kreshchenko", role:"Business Manager",             photo:"/team/yaroslav-kreshchenko.png", accent:"#B91C1C" },
-  { name:"Volodymyr Volchyk",    role:"Business Development Manager", photo:"/team/volodymyr-volchyk.png",    accent:"#DC2626" },
-  { name:"Viktoriia Rieznik",    role:"IT Business Partner",          photo:"/team/viktoriia-rieznik.png",    accent:"#EF4444" },
-  { name:"Erik Green",           role:"Business Consultant",          photo:"/team/erik-green.png",           accent:"#B91C1C" },
-  { name:"Ron Cussons",          role:"Financial Advisor",            photo:"/team/ron-cussons.png",          accent:"#DC2626" },
-  { name:"Peter AL Schrader",    role:"Private Investor",             photo:"/team/peter-schrader.png",       accent:"#EF4444" },
+  { name:"Nick Field",           role:"Managing Director, Poland",     photo:"/team/nick-field.png",           accent:"#DC2626" },
+  { name:"Andy Fordyce",         role:"Partnerships Manager",          photo:"/team/andy-fordyce.png",         accent:"#EF4444" },
+  { name:"Cezar Torescu",        role:"Product Engineering Manager",   photo:"/team/cezar-torescu.png",        accent:"#B91C1C" },
+  { name:"Jake Malliaros",       role:"Senior Product Manager",        photo:"/team/jake-malliaros.png",       accent:"#DC2626" },
+  { name:"Fabian Stierle",       role:"Senior Business Development",   photo:"/team/fabian-stierle.png",       accent:"#EF4444" },
+  { name:"Jori Lope",            role:"Senior Business Development",   photo:"/team/jori-lope.png",            accent:"#B91C1C" },
+  { name:"Mykhailo Plametiu",    role:"Senior Account Manager",        photo:"/team/mykhailo-plametiu.png",    accent:"#DC2626" },
+  { name:"Oleh Kopeichenko",     role:"Senior Account Manager",        photo:"/team/oleh-kopeichenko.png",     accent:"#EF4444" },
+  { name:"Yaroslav Kreshchenko", role:"Account Manager",               photo:"/team/yaroslav-kreshchenko.png", accent:"#B91C1C" },
+  { name:"Volodymyr Volchyk",    role:"Business Development Manager",  photo:"/team/volodymyr-volchyk.png",    accent:"#DC2626" },
+  { name:"Viktoriia Rieznik",    role:"IT Partner Manager",            photo:"/team/viktoriia-rieznik.png",    accent:"#EF4444" },
+  { name:"Erik Green",           role:"Solutions Consultant",          photo:"/team/erik-green.png",           accent:"#B91C1C" },
+  { name:"Ron Cussons",          role:"Financial Services Advisor",    photo:"/team/ron-cussons.png",          accent:"#DC2626" },
+  { name:"Peter AL Schrader",    role:"Strategic Investor",            photo:"/team/peter-schrader.png",       accent:"#EF4444" },
 ];
 
 export default function Team() {

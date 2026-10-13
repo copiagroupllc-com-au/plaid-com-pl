@@ -3,25 +3,25 @@ import ServicePreview from "../components/ServicePreview";
 import { useLanguage } from "../context/LanguageContext";
 
 const categoriesEN = [
-  { label:"All", id:"all" }, { label:"Investment", id:"investment" },
-  { label:"Fintech & Payments", id:"fintech" }, { label:"Web3 & Blockchain", id:"web3" },
-  { label:"AI & Data", id:"ai" }, { label:"Real Estate", id:"real-estate" }, { label:"Gaming", id:"gaming" },
+  { label:"All", id:"all" }, { label:"Account Connectivity", id:"connectivity" },
+  { label:"Payments", id:"payments" }, { label:"Identity & Compliance", id:"identity" },
+  { label:"Fraud & Risk", id:"fraud" }, { label:"Financial Management", id:"financial-management" }, { label:"Open Finance", id:"open-finance" },
 ];
 const categoriesPL = [
-  { label:"Wszystkie", id:"all" }, { label:"Inwestycje", id:"investment" },
-  { label:"Fintech i płatności", id:"fintech" }, { label:"Web3 i blockchain", id:"web3" },
-  { label:"AI i dane", id:"ai" }, { label:"Nieruchomości", id:"real-estate" }, { label:"Gaming", id:"gaming" },
+  { label:"Wszystkie", id:"all" }, { label:"Łączność z kontem", id:"connectivity" },
+  { label:"Płatności", id:"payments" }, { label:"Tożsamość i zgodność", id:"identity" },
+  { label:"Oszustwa i ryzyko", id:"fraud" }, { label:"Zarządzanie finansami", id:"financial-management" }, { label:"Otwarte finanse", id:"open-finance" },
 ];
 
 const insights = [
-  { category:"Investment",        accent:"#DC2626", previewUrl:"https://midas.app",          type:"Market Report",       title:"Central European Digital Asset Markets: Q3 2026 Outlook",           summary:"A comprehensive review of tokenised asset performance across CEE, covering regulatory shifts in Poland, Czech Republic, and Hungary — and what they mean for institutional capital allocation.", readTime:"12 min read", date:"July 2026",  author:"Alexander Reid", authorInitials:"AR", authorColor:"#DC2626", tags:["Tokenised Assets","CEE","Institutional","Regulatory"] },
-  { category:"Fintech & Payments",accent:"#EF4444", previewUrl:"https://stripe.com",         type:"Technical Deep-Dive", title:"Stablecoin Settlement Rails: Engineering a Stripe Alternative for Web3", summary:"An engineering-level breakdown of how USDC/USDT settlement rails, on-chain KYC attestations, and webhook infrastructure can replicate Stripe's developer experience for DeFi-native applications.", readTime:"15 min read", date:"June 2026",  author:"Priya Sharma",   authorInitials:"PS", authorColor:"#B91C1C", tags:["Stablecoins","Payments API","DeFi","Engineering"] },
-  { category:"Web3 & Blockchain", accent:"#B91C1C", previewUrl:"https://0g.ai",              type:"Research Note",       title:"Layer 2 Adoption Curves: What Ethereum Scaling Means for DApp Builders", summary:"With Optimism, Arbitrum, and Base commanding over $20B in TVL, we analyse how L2 cost structures are reshaping smart contract deployment strategies for production applications.", readTime:"10 min read", date:"June 2026",  author:"Mei Lin Chen",   authorInitials:"MC", authorColor:"#DC2626", tags:["Layer 2","Ethereum","TVL","Smart Contracts"] },
-  { category:"AI & Data",         accent:"#DC2626", previewUrl:"https://akash.network",      type:"Analysis",            title:"LLMs as Financial Co-Pilots: Accuracy, Hallucination Risk, and Compliance Guardrails", summary:"Financial institutions are deploying LLMs at scale, but hallucination rates in high-stakes contexts demand purpose-built guardrails. We evaluate RAG pipelines, fine-tuning approaches, and compliance frameworks.", readTime:"18 min read", date:"May 2026",   author:"David Nguyen",   authorInitials:"DN", authorColor:"#EF4444", tags:["LLMs","RAG","Compliance","FinanceAI"] },
-  { category:"Real Estate",       accent:"#EF4444", previewUrl:"https://www.blocksquare.io", type:"Property Intelligence",title:"Fractional Ownership Regulation in Poland: KNF's Evolving Framework", summary:"KNF has signalled a managed investment scheme pathway for tokenised real estate. We map out the compliance requirements, minimum capital thresholds, and disclosure obligations for platform operators in Poland.", readTime:"9 min read",  date:"May 2026",   author:"Emma Fischer",   authorInitials:"EF", authorColor:"#B91C1C", tags:["KNF","Regulation","Tokenisation","MIS"] },
-  { category:"Gaming",            accent:"#B91C1C", previewUrl:"https://xter.io",            type:"Industry Report",     title:"Web3 Gaming in 2026: The Play-to-Own Inflection Point",              summary:"After the play-to-earn crash of 2022, a new cohort of Web3 games with genuine gameplay loops is reaching mainstream audiences. We examine retention mechanics, guild economics, and NFT market liquidity.", readTime:"14 min read", date:"April 2026", author:"Lucas Andrade",  authorInitials:"LA", authorColor:"#DC2626", tags:["GameFi","NFT","Retention","Guild Economics"] },
-  { category:"Investment",        accent:"#DC2626", previewUrl:"https://www.arrow.markets",  type:"Macro View",          title:"Interest Rates, Digital Assets, and the Correlation Debate",          summary:"With the NBP cutting rates in 2026, we revisit the risk-on / risk-off correlation between digital assets and traditional macro indicators — and what it means for portfolio construction.", readTime:"11 min read", date:"April 2026", author:"Alexander Reid", authorInitials:"AR", authorColor:"#DC2626", tags:["Macro","NBP","Portfolio","Correlation"] },
-  { category:"Web3 & Blockchain", accent:"#EF4444", previewUrl:"https://xion.burnt.com",    type:"Protocol Analysis",   title:"DAO Treasury Management: Lessons from 50 Governance Experiments",   summary:"We surveyed 50 DAOs managing treasuries above $10M to identify best practices in diversification, spending governance, and off-chain / on-chain co-ordination.", readTime:"16 min read", date:"March 2026", author:"Mei Lin Chen",   authorInitials:"MC", authorColor:"#DC2626", tags:["DAO","Governance","Treasury","DeFi"] },
+  { category:"Open Finance",        accent:"#DC2626", previewUrl:"https://plaid.com/use-cases/open-finance/", type:"Market Report",       title:"Central European Open Banking Markets: Q3 2026 Outlook",           summary:"A comprehensive review of open banking API adoption across CEE, covering PSD2 implementation quality in Poland, Czech Republic, and Hungary — and what the upcoming FIDA framework means for financial data sharing.", readTime:"12 min read", date:"July 2026",  author:"Nick Field", authorInitials:"NF", authorColor:"#DC2626", tags:["Open Banking","CEE","PSD2","FIDA"] },
+  { category:"Payments",accent:"#EF4444", previewUrl:"https://plaid.com/products/transfer/", type:"Technical Deep-Dive", title:"Account-to-Account Payments: Engineering Reliable Bank Transfer Infrastructure", summary:"An engineering-level breakdown of ACH initiation, return risk prediction, balance pre-checks, and webhook reliability — and how Plaid's Transfer and Signal products reduce payment failure rates.", readTime:"15 min read", date:"June 2026",  author:"Andy Fordyce",   authorInitials:"AF", authorColor:"#B91C1C", tags:["A2A Payments","ACH","Risk","Engineering"] },
+  { category:"Identity & Compliance", accent:"#B91C1C", previewUrl:"https://plaid.com/products/identity-verification/", type:"Research Note", title:"KYC Onboarding in 2026: Document Verification, Liveness Detection, and Bank Data", summary:"With AML enforcement intensifying across the EU, we analyse how combining document verification, liveness checks, and bank account cross-referencing improves both fraud prevention and onboarding conversion.", readTime:"10 min read", date:"June 2026",  author:"Cezar Torescu",   authorInitials:"CT", authorColor:"#DC2626", tags:["KYC","AML","Identity","Onboarding"] },
+  { category:"Fraud & Risk",         accent:"#DC2626", previewUrl:"https://plaid.com/products/monitor/", type:"Analysis", title:"AML Watchlist Screening at Scale: Accuracy, Latency, and False Positive Rates", summary:"Financial institutions deploying AML screening at onboarding face a difficult tradeoff between thoroughness and speed. We evaluate real-time screening architectures, fuzzy matching approaches, and false positive management strategies.", readTime:"18 min read", date:"May 2026",   author:"Jake Malliaros",   authorInitials:"JM", authorColor:"#EF4444", tags:["AML","Watchlist","Compliance","FinCrime"] },
+  { category:"Financial Management",       accent:"#EF4444", previewUrl:"https://plaid.com/products/transactions/", type:"Product Intelligence", title:"Transaction Categorisation in Poland: Building Accurate Spending Models for CEE", summary:"Categorising Polish transaction data requires handling local merchant naming conventions, BLIK payment descriptors, and multi-currency flows. We map out the categorisation challenges specific to Polish bank data.", readTime:"9 min read",  date:"May 2026",   author:"Viktoriia Rieznik",   authorInitials:"VR", authorColor:"#B91C1C", tags:["Transactions","Categorisation","CEE","Data"] },
+  { category:"Open Finance",            accent:"#B91C1C", previewUrl:"https://plaid.com/blog/open-finance-strategy-update/", type:"Industry Report", title:"FIDA and the Future of Open Finance in Central Europe", summary:"The EU's Financial Data Access framework will extend open finance beyond payments to investment, insurance, and pension data. We examine what FIDA means for Polish fintechs, banks, and consumers.", readTime:"14 min read", date:"April 2026", author:"Fabian Stierle",  authorInitials:"FS", authorColor:"#DC2626", tags:["FIDA","Open Finance","EU Regulation","Data Rights"] },
+  { category:"Account Connectivity",        accent:"#DC2626", previewUrl:"https://plaid.com/products/auth/", type:"Macro View", title:"Polish Bank API Quality Index: Ranking PSD2 Implementations Across Major Institutions", summary:"We benchmarked PSD2 API implementations across Poland's top 10 banks on uptime, response time, OAuth support, data completeness, and developer documentation quality.", readTime:"11 min read", date:"April 2026", author:"Nick Field", authorInitials:"NF", authorColor:"#DC2626", tags:["PSD2","Bank APIs","Poland","Developer Experience"] },
+  { category:"Payments", accent:"#EF4444", previewUrl:"https://plaid.com/products/signal/", type:"Protocol Analysis", title:"Reducing ACH Return Rates: Lessons from 50 Payment Platforms", summary:"We analysed return rate data across 50 platforms using Plaid Signal to identify the account signals most predictive of ACH returns — and the intervention strategies that most effectively reduce them.", readTime:"16 min read", date:"March 2026", author:"Andy Fordyce",   authorInitials:"AF", authorColor:"#DC2626", tags:["ACH","Returns","Signal","Risk"] },
 ];
 
 const stats = [
@@ -87,7 +87,7 @@ export default function Insight() {
               </div>
               <div className="lg:col-span-3 p-10 flex flex-col justify-center">
                 <div className="flex items-center gap-3 mb-4">
-                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#DC2626]/15 text-[#DC2626]">{lang === "pl" ? "Inwestycje" : "Investment"}</span>
+                  <span className="px-3 py-1 rounded-full text-xs font-semibold bg-[#DC2626]/15 text-[#DC2626]">{lang === "pl" ? "Otwarte finanse" : "Open Finance"}</span>
                   <span className="text-gray-600 text-xs">July 2026 · 12 min read</span>
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-bold text-white mb-4 group-hover:text-[#DC2626] transition-colors font-display">{featured.title}</h3>
@@ -97,9 +97,9 @@ export default function Insight() {
                 </div>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-xs bg-[#DC2626]">AR</div>
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-white text-xs bg-[#DC2626]">NF</div>
                     <div>
-                      <p className="text-white text-xs font-medium">Alexander Reid</p>
+                      <p className="text-white text-xs font-medium">Nick Field</p>
                       <p className="text-gray-600 text-xs">{t("insight_ceo")}</p>
                     </div>
                   </div>
@@ -154,7 +154,7 @@ export default function Insight() {
             <h2 className="text-3xl font-bold text-white mb-4 font-display">{t("insight_newsletter_h2")}</h2>
             <p className="text-gray-500 max-w-xl mx-auto mb-8">{t("insight_newsletter_sub")}</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto">
-              <a href="mailto:contact@copiagroupllc.com.pl?subject=Insights Subscription"
+              <a href="mailto:contact@plaid.com.pl?subject=Insights Subscription"
                 className="flex-1 px-6 py-3 rounded-full bg-[#DC2626] text-white font-bold text-sm hover:bg-[#EF4444] transition-colors shadow-lg shadow-red-700/25">
                 {t("insight_subscribe_btn")}
               </a>

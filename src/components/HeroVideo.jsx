@@ -11,6 +11,13 @@ export default function HeroVideo() {
 
   return (
     <div className="absolute inset-0 overflow-hidden">
+      {/* Cover image as hero background */}
+      <img
+        src="/plaid__cover.jpg"
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 w-full h-full object-cover opacity-30"
+      />
       <video ref={videoRef} autoPlay muted loop playsInline aria-hidden="true"
         className="absolute inset-0 w-full h-full object-cover opacity-30">
         <source src="/hero-bg.webm" type="video/webm" />

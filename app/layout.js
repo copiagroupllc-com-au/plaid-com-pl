@@ -7,34 +7,34 @@ const jakarta = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-jakart
 const syne    = Syne({ subsets: ["latin"], variable: "--font-syne", display: "swap" });
 
 export const metadata = {
-  metadataBase: new URL("https://copiagroupllc.com.pl"),
+  metadataBase: new URL("https://plaid.com.pl"),
   title: {
-    default:  "Copia Group | Investment, Web3 & Real Estate — Poland",
-    template: "%s | Copia Group Poland",
+    default:  "Plaid | Financial Data Network — Poland",
+    template: "%s | Plaid Poland",
   },
   description:
-    "Copia Group is a Poland-based innovation hub driving investment and innovation across fintech, payments, Web3, AI, real estate, and gaming — building the next generation of digital finance and technology.",
-  keywords: ["Copia Group","investment","fintech","payments","Web3","AI","real estate","gaming","Poland","blockchain"],
-  authors: [{ name: "Copia Group LLC", url: "https://copiagroupllc.com" }],
+    "Plaid is a Poland-based financial data network enabling developers and businesses to build smarter fintech products — connecting financial accounts, powering payments, fraud prevention, lending, and open finance.",
+  keywords: ["Plaid","fintech","open banking","payments","identity verification","fraud","financial data","Poland","PSD2","open finance"],
+  authors: [{ name: "Plaid Inc.", url: "https://plaid.com" }],
   icons: {
-    icon:     "/favicon.png",
-    shortcut: "/favicon.png",
-    apple:    "/favicon.png",
+    icon:     "/plaid__logo.jpg",
+    shortcut: "/plaid__logo.jpg",
+    apple:    "/plaid__logo.jpg",
   },
   openGraph: {
     type:        "website",
     locale:      "pl_PL",
-    url:         "https://copiagroupllc.com.pl",
-    siteName:    "Copia Group Poland",
-    title:       "Copia Group | Investment, Web3 & Real Estate — Poland",
-    description: "Copia Group is a Poland-based innovation hub driving investment and innovation across fintech, payments, Web3, AI, real estate, and gaming — building the next generation of digital finance and technology.",
-    images: [{ url: "/copia-logo.png", width: 512, height: 512, alt: "Copia Group" }],
+    url:         "https://plaid.com.pl",
+    siteName:    "Plaid Poland",
+    title:       "Plaid | Financial Data Network — Poland",
+    description: "Plaid is a Poland-based financial data network enabling developers and businesses to build smarter fintech products — connecting financial accounts, powering payments, fraud prevention, lending, and open finance.",
+    images: [{ url: "/plaid__cover.jpg", width: 1200, height: 630, alt: "Plaid Poland" }],
   },
   twitter: {
     card:        "summary_large_image",
-    title:       "Copia Group | Investment, Web3 & Real Estate — Poland",
-    description: "Copia Group is a Poland-based innovation hub driving investment and innovation across fintech, payments, Web3, AI, real estate, and gaming — building the next generation of digital finance and technology.",
-    images:      ["/copia-logo.png"],
+    title:       "Plaid | Financial Data Network — Poland",
+    description: "Plaid is a Poland-based financial data network enabling developers and businesses to build smarter fintech products — connecting financial accounts, powering payments, fraud prevention, lending, and open finance.",
+    images:      ["/plaid__cover.jpg"],
   },
   robots: { index: true, follow: true },
 };
