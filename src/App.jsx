@@ -13,7 +13,6 @@ import Blog       from "./pages/Blog";
 import BlogPost   from "./pages/BlogPost";
 import Career     from "./pages/Career";
 import CareerDetail from "./pages/CareerDetail";
-import Apply      from "./pages/Apply";
 import Contact    from "./pages/Contact";
 import NotFound   from "./pages/NotFound";
 
@@ -39,7 +38,6 @@ function AppShell() {
           <Route path="/blog/:slug"    element={<BlogPost />} />
           <Route path="/career"        element={<Career />} />
           <Route path="/career/:slug"  element={<CareerDetail />} />
-          <Route path="/apply/:role"   element={<Apply />} />
           <Route path="/contact"       element={<Contact />} />
           <Route path="*"              element={<NotFound />} />
         </Routes>
