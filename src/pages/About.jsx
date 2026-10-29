@@ -77,8 +77,8 @@ export default function About() {
         <div className="max-w-2xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-white mb-4 font-display">{t("about_cta_h2")}</h2>
           <p className="text-gray-500 mb-8">{t("about_cta_sub")}</p>
-          <Link to="/team" className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#DC2626] text-white font-bold hover:bg-[#EF4444] transition-colors">
-            {t("about_cta_btn")}
+          <Link to="/career" className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-[#DC2626] text-white font-bold hover:bg-[#EF4444] transition-colors">
+            {t("career_see_roles")}
           </Link>
         </div>
       </section>

@@ -22,7 +22,6 @@ export default function Footer() {
   const footerLinks = {
     [t("footer_col_company")]: [
       { to:"/about",   label:t("footer_about") },
-      { to:"/team",    label:t("footer_team") },
       { to:"/insight", label:t("footer_insights") },
       { to:"/career",  label:t("footer_careers") },
       { to:"/blog",    label:t("footer_blog") },

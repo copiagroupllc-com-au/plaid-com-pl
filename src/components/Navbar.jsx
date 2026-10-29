@@ -30,7 +30,6 @@ export default function Navbar() {
     { to:"/about",    label:t("nav_about") },
     { to:"/services", label:t("nav_services") },
     { to:"/insight",  label:t("nav_insights") },
-    { to:"/team",     label:t("nav_team") },
     { to:"/career",   label:t("nav_career") },
     { to:"/blog",     label:t("nav_blog") },
     { to:"/contact",  label:t("nav_contact") },
