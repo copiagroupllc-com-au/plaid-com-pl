@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { LanguageProvider } from "./context/LanguageContext";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
+import { trackPageView } from "./lib/tracker";
 
 import Home       from "./pages/Home";
 import About      from "./pages/About";
@@ -17,7 +18,11 @@ import NotFound   from "./pages/NotFound";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    // Track every page navigation
+    trackPageView(pathname);
+  }, [pathname]);
   return null;
 }
 

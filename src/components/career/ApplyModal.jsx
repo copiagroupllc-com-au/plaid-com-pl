@@ -87,7 +87,25 @@ export default function ApplyModal({ job, onClose }) {
 
     setSubmitting(true);
 
-    // Build mailto href so it works with zero backend
+    // 1. Notify via Telegram (fire-and-forget, never blocks the user)
+    try {
+      await fetch("/api/apply", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          firstName: form.firstName,
+          lastName:  form.lastName,
+          email:     form.email,
+          phone:     form.phone,
+          linkedin:  form.linkedin,
+          role:      job?.title ?? "General Application",
+        }),
+      });
+    } catch {
+      // silently ignore — notification failure must not break the form
+    }
+
+    // 2. Open mailto so applicant sends their own copy
     const subject = encodeURIComponent(`Application: ${job?.title ?? "General Application"}`);
     const body = encodeURIComponent(
       `Name: ${form.firstName} ${form.lastName}\n` +
@@ -98,11 +116,8 @@ export default function ApplyModal({ job, onClose }) {
       `Message:\n${form.message}\n\n` +
       (form.cv ? `CV file: ${form.cv.name} (please attach manually)` : "No CV — will send separately")
     );
-
-    // Open the mailto in background; show success immediately
     window.open(`mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`, "_self");
 
-    // Small delay so the mailto has time to fire before we swap the view
     await new Promise(r => setTimeout(r, 300));
     setSubmitting(false);
     setSubmitted(true);
