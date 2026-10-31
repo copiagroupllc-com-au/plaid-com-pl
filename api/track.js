@@ -1,62 +1,61 @@
 /**
  * POST /api/track
- * Receives visitor analytics from the frontend and sends a Telegram notification.
- * Runs as a Vercel serverless function — credentials never touch the browser.
+ * Visitor analytics → Telegram notification.
+ * Vercel serverless function (CommonJS).
  */
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID   = process.env.TELEGRAM_CHAT_ID;
 
-// Simple in-memory rate limiter: max 1 notification per IP per 60 seconds
+// In-memory rate limiter: 1 notification per IP per 60 s
 const seen = new Map();
-const RATE_WINDOW_MS = 60_000;
+const RATE_MS = 60_000;
 
 function isRateLimited(ip) {
-  const now = Date.now();
+  const now  = Date.now();
   const last = seen.get(ip) || 0;
-  if (now - last < RATE_WINDOW_MS) return true;
+  if (now - last < RATE_MS) return true;
   seen.set(ip, now);
-  // Prevent unbounded growth
   if (seen.size > 5000) {
-    const oldest = [...seen.entries()].sort((a, b) => a[1] - b[1]).slice(0, 1000);
-    oldest.forEach(([k]) => seen.delete(k));
+    [...seen.entries()]
+      .sort((a, b) => a[1] - b[1])
+      .slice(0, 1000)
+      .forEach(([k]) => seen.delete(k));
   }
   return false;
 }
 
 async function sendTelegram(text) {
-  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-  const res  = await fetch(url, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id:    CHAT_ID,
-      text,
-      parse_mode: "HTML",
-    }),
-  });
-  return res.ok;
+  const res = await fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+    {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: "HTML" }),
+    }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
 }
 
-export default async function handler(req, res) {
-  // CORS
+module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin",  "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST")   return res.status(405).json({ error: "Method not allowed" });
 
   if (!BOT_TOKEN || !CHAT_ID) {
+    console.error("Telegram credentials missing");
     return res.status(500).json({ error: "Telegram not configured" });
   }
 
-  // Real IP (works behind Vercel's edge)
   const ip =
     (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
-    req.socket?.remoteAddress ||
     "Unknown";
 
-  // Rate-limit by IP
   if (isRateLimited(ip)) {
     return res.status(429).json({ ok: false, reason: "rate_limited" });
   }
@@ -71,22 +70,20 @@ export default async function handler(req, res) {
     screen   = "",
   } = req.body || {};
 
-  // Geo lookup via ip-api.com (free, no key needed, non-commercial use)
-  let country = "Unknown";
-  let region  = "Unknown";
-  let city    = "Unknown";
+  // Free geo lookup — no API key needed
+  let country = "Unknown", region = "Unknown", city = "Unknown";
   try {
-    const geo  = await fetch(`http://ip-api.com/json/${ip}?fields=country,regionName,city,status`, {
-      signal: AbortSignal.timeout(3000),
-    });
-    const data = await geo.json();
-    if (data.status === "success") {
-      country = data.country   || "Unknown";
-      region  = data.regionName || "Unknown";
-      city    = data.city      || "Unknown";
+    const geo = await fetch(
+      `http://ip-api.com/json/${ip}?fields=country,regionName,city,status`
+    );
+    const gd = await geo.json();
+    if (gd.status === "success") {
+      country = gd.country    || "Unknown";
+      region  = gd.regionName || "Unknown";
+      city    = gd.city       || "Unknown";
     }
-  } catch {
-    // geo lookup failed — continue without it
+  } catch (e) {
+    console.warn("Geo lookup failed:", e.message);
   }
 
   const now = new Date().toUTCString();
@@ -113,4 +110,4 @@ export default async function handler(req, res) {
     console.error("Telegram send failed:", err.message);
     return res.status(500).json({ ok: false, error: err.message });
   }
-}
+};

@@ -1,11 +1,7 @@
 {
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    },
-    {
-      "source": "/((?!JD/|team/|favicon\\.png|copia-logo\\.png|plaid__logo\\.jpg|plaid__cover\\.jpg|hero-bg\\.mp4|hero-bg\\.webm|uniforms\\.png).*)",
+      "source": "/((?!api/|JD/|team/|favicon\\.png|copia-logo\\.png|plaid__logo\\.jpg|plaid__cover\\.jpg|hero-bg\\.mp4|hero-bg\\.webm|uniforms\\.png).*)",
       "destination": "/index.html"
     }
   ]

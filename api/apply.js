@@ -1,35 +1,36 @@
 /**
  * POST /api/apply
- * Receives job application data and sends a Telegram notification.
- * Only fires with data the applicant explicitly typed and submitted.
+ * Job application → Telegram notification.
+ * Vercel serverless function (CommonJS).
  */
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID   = process.env.TELEGRAM_CHAT_ID;
 
 async function sendTelegram(text) {
-  const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-  const res  = await fetch(url, {
-    method:  "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      chat_id:    CHAT_ID,
-      text,
-      parse_mode: "HTML",
-    }),
-  });
-  return res.ok;
+  const res = await fetch(
+    `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+    {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat_id: CHAT_ID, text, parse_mode: "HTML" }),
+    }
+  );
+  const data = await res.json();
+  if (!res.ok) throw new Error(JSON.stringify(data));
+  return data;
 }
 
-export default async function handler(req, res) {
-  // CORS
+module.exports = async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin",  "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "POST")   return res.status(405).json({ error: "Method not allowed" });
 
   if (!BOT_TOKEN || !CHAT_ID) {
+    console.error("Telegram credentials missing");
     return res.status(500).json({ error: "Telegram not configured" });
   }
 
@@ -42,7 +43,6 @@ export default async function handler(req, res) {
     role      = "General Application",
   } = req.body || {};
 
-  // Basic validation — all provided by the applicant voluntarily
   if (!firstName || !email) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -65,4 +65,4 @@ export default async function handler(req, res) {
     console.error("Telegram send failed:", err.message);
     return res.status(500).json({ ok: false, error: err.message });
   }
-}
+};
