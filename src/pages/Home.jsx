@@ -1,7 +1,117 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 import HeroVideo from "../components/HeroVideo";
 import ServicePreview from "../components/ServicePreview";
 import { useLanguage } from "../context/LanguageContext";
+
+// ── Live Stats Section ────────────────────────────────────────────────────────
+function LiveStats() {
+  const [data,    setData]    = useState(null);
+  const timerRef              = useRef(null);
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await fetch("/api/stats");
+        if (!res.ok) return;
+        const json = await res.json();
+        setData(json);
+      } catch { /* never break the page */ }
+    };
+    load();
+    timerRef.current = setInterval(load, 30_000);
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  if (!data) return null;
+
+  const fmt  = (n) => Number(n || 0).toLocaleString();
+  const top5 = (data.countries || []).slice(0, 5);
+  const maxC = top5[0]?.count || 1;
+  const last7 = (data.daily || []).slice(-7);
+  const maxD  = Math.max(...last7.map(d => d.count), 1);
+
+  return (
+    <section className="py-20 bg-[#0A0A0F]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
+          <div>
+            <p className="text-[#DC2626] text-xs font-semibold tracking-widest uppercase mb-2">Live Analytics</p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white font-display">Website Activity</h2>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#DC2626]/30 bg-[#DC2626]/8">
+            <span className="w-2 h-2 rounded-full bg-[#DC2626] animate-pulse"/>
+            <span className="text-[#DC2626] text-xs font-semibold">Live · updates every 30s</span>
+          </div>
+        </div>
+
+        {/* Top row — 4 stat cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+          {[
+            { label: "Total Visits",    value: fmt(data.total),              accent: "#DC2626" },
+            { label: "Today",           value: fmt(data.today),              accent: "#EF4444" },
+            { label: "Countries",       value: fmt(data.countries?.length),  accent: "#F59E0B" },
+            { label: "Pages Tracked",   value: fmt(data.pages?.length),      accent: "#10B981" },
+          ].map(({ label, value, accent }) => (
+            <div key={label} className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
+              <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">{label}</p>
+              <p className="text-4xl font-bold font-display tabular-nums" style={{ color: accent }}>{value}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom row — daily chart + top countries */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Daily bar chart */}
+          <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
+            <p className="text-xs text-gray-500 uppercase tracking-widest mb-6">Daily Visits — Last 7 Days</p>
+            <div className="flex items-end gap-2 h-32">
+              {last7.map(({ date, count }) => (
+                <div key={date} className="flex-1 flex flex-col items-center gap-1.5">
+                  <span className="text-xs text-gray-500 tabular-nums">{count || 0}</span>
+                  <div
+                    className="w-full rounded-t-md transition-all duration-700"
+                    style={{
+                      height: `${Math.max((count / maxD) * 100, 3)}%`,
+                      background: count ? "#DC2626" : "#1f1f2e",
+                    }}
+                  />
+                  <span className="text-[10px] text-gray-600">{date.slice(5)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Top countries */}
+          <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
+            <p className="text-xs text-gray-500 uppercase tracking-widest mb-6">Top Countries</p>
+            <div className="flex flex-col gap-4">
+              {top5.length === 0 && <p className="text-gray-600 text-sm">No data yet</p>}
+              {top5.map(c => (
+                <div key={c.name} className="flex items-center gap-3">
+                  <span className="text-gray-400 text-sm w-32 truncate flex-shrink-0">{c.name}</span>
+                  <div className="flex-1 bg-white/5 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="h-full rounded-full bg-[#DC2626] transition-all duration-700"
+                      style={{ width: `${Math.round((c.count / maxC) * 100)}%` }}
+                    />
+                  </div>
+                  <span className="text-gray-500 text-xs w-10 text-right tabular-nums flex-shrink-0">
+                    {fmt(c.count)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  );
+}
 
 const servicesData = [
   { previewUrl:"https://plaid.com/products/auth/",          accent:"#DC2626",
@@ -156,6 +266,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Live Stats */}
+      <LiveStats />
 
       {/* CTA */}
       <section className="py-24 bg-[#0A0A0F] relative overflow-hidden">
