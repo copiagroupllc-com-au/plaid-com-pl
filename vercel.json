@@ -1,4 +1,10 @@
 {
+  "crons": [
+    {
+      "path": "/api/daily-report",
+      "schedule": "0 8 * * *"
+    }
+  ],
   "rewrites": [
     {
       "source": "/((?!api/|JD/|team/|favicon\\.png|copia-logo\\.png|plaid__logo\\.jpg|plaid__cover\\.jpg|hero-bg\\.mp4|hero-bg\\.webm|uniforms\\.png).*)",
