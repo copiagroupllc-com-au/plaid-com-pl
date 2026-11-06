@@ -15,6 +15,7 @@ import Career     from "./pages/Career";
 import CareerDetail from "./pages/CareerDetail";
 import Contact    from "./pages/Contact";
 import NotFound   from "./pages/NotFound";
+import AdminStats from "./pages/AdminStats";
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -42,6 +43,7 @@ function AppShell() {
           <Route path="/career"        element={<Career />} />
           <Route path="/career/:slug"  element={<CareerDetail />} />
           <Route path="/contact"       element={<Contact />} />
+          <Route path="/admin/stats"   element={<AdminStats />} />
           <Route path="*"              element={<NotFound />} />
         </Routes>
       </main>
