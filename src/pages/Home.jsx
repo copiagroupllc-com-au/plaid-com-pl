@@ -1,11 +1,7 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect, lazy, Suspense } from "react";
 import HeroVideo from "../components/HeroVideo";
 import ServicePreview from "../components/ServicePreview";
 import { useLanguage } from "../context/LanguageContext";
-
-// Lazy-load the map so a Leaflet crash never takes down the whole page
-const VisitorMap = lazy(() => import("../components/VisitorMap"));
 
 const servicesData = [
   { previewUrl:"https://plaid.com/products/auth/",          accent:"#DC2626",
@@ -40,156 +36,6 @@ const servicesData = [
     to:"/services#open-finance" },
 ];
 
-// ── Live stats section ────────────────────────────────────────────────────────
-function LiveStats() {
-  const [data,    setData]    = useState(null);
-  const [loading, setLoading] = useState(true);
-  const timerRef = useRef(null);
-
-  const load = async () => {
-    try {
-      const res  = await fetch("/api/stats");
-      // If protected by ADMIN_TOKEN, skip silently
-      if (res.status === 401) return;
-      if (!res.ok) return;
-      const json = await res.json();
-      setData(json);
-    } catch {
-      // never break the page
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    load();
-    timerRef.current = setInterval(load, 30_000);
-    return () => clearInterval(timerRef.current);
-  }, []);
-
-  if (loading || !data) return null;
-
-  const fmt = (n) => Number(n||0).toLocaleString();
-  const topCountries = (data.countries||[]).slice(0,5);
-  const totalC = topCountries.reduce((s,c) => s+c.count, 0) || 1;
-
-  return (
-    <section className="py-20 bg-[#0A0A0F]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Header */}
-        <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
-          <div>
-            <p className="text-[#DC2626] text-xs font-semibold tracking-widest uppercase mb-2">
-              Live Analytics
-            </p>
-            <h2 className="text-3xl sm:text-4xl font-bold text-white font-display">
-              Website Activity
-            </h2>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#DC2626]/30 bg-[#DC2626]/8">
-            <span className="w-2 h-2 rounded-full bg-[#DC2626] animate-pulse"/>
-            <span className="text-[#DC2626] text-xs font-semibold">Live · updates every 30s</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-          {/* Left — counters + countries */}
-          <div className="flex flex-col gap-4">
-
-            {/* Total visits */}
-            <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
-              <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Total Visits</p>
-              <p className="text-5xl font-bold text-[#DC2626] font-display tabular-nums">
-                {fmt(data.total)}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">All time</p>
-            </div>
-
-            {/* Today */}
-            <div className="p-6 rounded-2xl border border-[#DC2626]/20 bg-[#111118]">
-              <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Today</p>
-              <p className="text-5xl font-bold text-[#EF4444] font-display tabular-nums">
-                {fmt(data.today)}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">{new Date().toLocaleDateString()}</p>
-            </div>
-
-            {/* Top countries */}
-            <div className="p-6 rounded-2xl border border-white/8 bg-[#111118] flex-1">
-              <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">Top Countries</p>
-              <div className="flex flex-col gap-3">
-                {topCountries.length === 0 && (
-                  <p className="text-gray-600 text-sm">No data yet</p>
-                )}
-                {topCountries.map(c => {
-                  const w = Math.round((c.count/totalC)*100);
-                  return (
-                    <div key={c.name} className="flex items-center gap-3 text-sm">
-                      <span className="text-gray-400 w-28 truncate flex-shrink-0">{c.name}</span>
-                      <div className="flex-1 bg-white/5 rounded-full h-1.5 overflow-hidden">
-                        <div className="h-full rounded-full bg-[#DC2626] transition-all duration-700"
-                          style={{ width:`${w}%` }}/>
-                      </div>
-                      <span className="text-gray-600 text-xs w-10 text-right tabular-nums">{fmt(c.count)}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Right — Leaflet world map (spans 2 cols) */}
-          <div className="lg:col-span-2 p-6 rounded-2xl border border-white/8 bg-[#111118] flex flex-col">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Visitor Locations</p>
-              <span className="text-xs text-gray-700">
-                {data.geo?.length || 0} points · click for details
-              </span>
-            </div>
-            <Suspense fallback={
-              <div className="flex items-center justify-center bg-[#0d1117] rounded-xl" style={{ height: "340px" }}>
-                <div className="w-6 h-6 border-2 border-[#DC2626] border-t-transparent rounded-full animate-spin"/>
-              </div>
-            }>
-              <VisitorMap geo={data.geo} height="340px" />
-            </Suspense>
-          </div>
-        </div>
-
-        {/* 7-day mini chart */}
-        {data.daily?.length > 0 && (() => {
-          const last7 = data.daily.slice(-7);
-          const max   = Math.max(...last7.map(d => d.count), 1);
-          return (
-            <div className="mt-6 p-6 rounded-2xl border border-white/8 bg-[#111118]">
-              <p className="text-xs text-gray-500 uppercase tracking-widest mb-6">
-                Daily Visits — Last 7 Days
-              </p>
-              <div className="flex items-end gap-2 h-24">
-                {last7.map(({ date, count }) => (
-                  <div key={date} className="flex-1 flex flex-col items-center gap-1">
-                    <span className="text-xs text-gray-600 tabular-nums">{count||0}</span>
-                    <div className="w-full rounded-t-sm transition-all duration-700"
-                      style={{
-                        height: `${Math.max((count/max)*100, 3)}%`,
-                        background: count ? "#DC2626" : "#1f1f2e",
-                      }}/>
-                    <span className="text-[10px] text-gray-700">{date.slice(5)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          );
-        })()}
-
-      </div>
-    </section>
-  );
-}
-
-// ── Page ──────────────────────────────────────────────────────────────────────
 export default function Home() {
   const { t, lang } = useLanguage();
 
@@ -310,9 +156,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
-      {/* Live stats — only renders if Redis is configured */}
-      <LiveStats />
 
       {/* CTA */}
       <section className="py-24 bg-[#0A0A0F] relative overflow-hidden">

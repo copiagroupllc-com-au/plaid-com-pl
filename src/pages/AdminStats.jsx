@@ -1,7 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from "react";
-
-// Lazy-load so a Leaflet crash never blanks the whole dashboard
-const VisitorMap = lazy(() => import("../components/VisitorMap"));
+import { useState, useEffect, useCallback } from "react";
 
 const REFRESH_MS = 15_000;
 
