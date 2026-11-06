@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import VisitorMap from "../components/VisitorMap";
+import { useState, useEffect, useCallback, lazy, Suspense } from "react";
+
+// Lazy-load so a Leaflet crash never blanks the whole dashboard
+const VisitorMap = lazy(() => import("../components/VisitorMap"));
 
 const REFRESH_MS = 15_000;
 
@@ -228,11 +230,13 @@ export default function AdminStats() {
 
         {/* Leaflet world map */}
         <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
-          <VisitorMap
-            geo={data?.geo}
-            height="460px"
-            label="Visitor Locations"
-          />
+          <Suspense fallback={
+            <div className="flex items-center justify-center bg-[#0d1117] rounded-xl" style={{ height: "460px" }}>
+              <div className="w-6 h-6 border-2 border-[#DC2626] border-t-transparent rounded-full animate-spin"/>
+            </div>
+          }>
+            <VisitorMap geo={data?.geo} height="460px" label="Visitor Locations" />
+          </Suspense>
         </div>
 
         {/* Daily chart */}

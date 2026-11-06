@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 import HeroVideo from "../components/HeroVideo";
 import ServicePreview from "../components/ServicePreview";
 import { useLanguage } from "../context/LanguageContext";
-import VisitorMap from "../components/VisitorMap";
+
+// Lazy-load the map so a Leaflet crash never takes down the whole page
+const VisitorMap = lazy(() => import("../components/VisitorMap"));
 
 const servicesData = [
   { previewUrl:"https://plaid.com/products/auth/",          accent:"#DC2626",
@@ -146,7 +148,13 @@ function LiveStats() {
                 {data.geo?.length || 0} points · click for details
               </span>
             </div>
-            <VisitorMap geo={data.geo} height="340px" />
+            <Suspense fallback={
+              <div className="flex items-center justify-center bg-[#0d1117] rounded-xl" style={{ height: "340px" }}>
+                <div className="w-6 h-6 border-2 border-[#DC2626] border-t-transparent rounded-full animate-spin"/>
+              </div>
+            }>
+              <VisitorMap geo={data.geo} height="340px" />
+            </Suspense>
           </div>
         </div>
 
