@@ -78,7 +78,7 @@ export default function AdminStats() {
     try {
       const tk  = t !== undefined ? t : token;
       const res = await fetch(`/api/stats?token=${encodeURIComponent(tk)}`);
-      if (res.status === 401) { setAuthed(false); setError("Invalid token"); return; }
+      if (res.status === 401) { setAuthed(false); setError("Invalid token"); setLoading(false); return; }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
       setData(json);
@@ -92,9 +92,20 @@ export default function AdminStats() {
     }
   }, [token]);
 
+  // On first mount — if we have a saved token, try it immediately
+  useEffect(() => {
+    const saved = sessionStorage.getItem("admin_token");
+    if (saved) {
+      fetchStats(saved);
+    } else {
+      setLoading(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-refresh once authed
   useEffect(() => {
     if (!authed) return;
-    fetchStats();
     if (!live) return;
     const id = setInterval(() => fetchStats(), REFRESH_MS);
     return () => clearInterval(id);
