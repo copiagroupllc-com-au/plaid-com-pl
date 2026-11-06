@@ -1,8 +1,9 @@
 import { Link } from "react-router-dom";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import HeroVideo from "../components/HeroVideo";
 import ServicePreview from "../components/ServicePreview";
 import { useLanguage } from "../context/LanguageContext";
+import VisitorMap from "../components/VisitorMap";
 
 const servicesData = [
   { previewUrl:"https://plaid.com/products/auth/",          accent:"#DC2626",
@@ -36,64 +37,6 @@ const servicesData = [
     desc_en:"PSD2 & Section 1033-ready open finance platform — permissioned data sharing with consent management.",
     to:"/services#open-finance" },
 ];
-
-// ── Mini world map ────────────────────────────────────────────────────────────
-function MiniMap({ geo }) {
-  const project = (lat, lon) => ({
-    x: ((lon + 180) / 360) * 800,
-    y: ((90  - lat) / 180) * 400,
-  });
-  return (
-    <div className="relative w-full overflow-hidden rounded-xl bg-[#0A0A0F]" style={{ paddingBottom: "50%" }}>
-      <svg viewBox="0 0 800 400" className="absolute inset-0 w-full h-full">
-        {/* Continents */}
-        <g fill="#1a2235" stroke="#2a3550" strokeWidth="0.6">
-          <path d="M68,58 L175,48 L215,68 L225,105 L205,138 L178,168 L152,188 L118,192 L98,172 L85,142 L78,108 L85,78 Z"/>
-          <path d="M178,28 L220,22 L238,38 L228,58 L200,62 L178,50 Z"/>
-          <path d="M148,198 L195,192 L218,215 L222,258 L206,298 L182,328 L158,318 L140,285 L136,248 L144,218 Z"/>
-          <path d="M368,52 L425,44 L448,60 L442,82 L418,96 L388,92 L365,76 Z"/>
-          <path d="M368,102 L428,96 L450,118 L455,168 L438,218 L405,248 L375,238 L352,205 L346,158 L358,122 Z"/>
-          <path d="M445,28 L595,22 L648,42 L658,68 L635,88 L598,98 L548,92 L498,85 L462,72 L445,48 Z"/>
-          <path d="M448,98 L498,92 L515,112 L508,132 L478,138 L452,125 Z"/>
-          <path d="M498,88 L598,82 L638,102 L628,128 L595,138 L555,132 L515,135 L495,118 Z"/>
-          <path d="M548,62 L638,55 L668,78 L655,105 L625,115 L578,108 L548,88 Z"/>
-          <path d="M578,228 L648,222 L672,248 L662,278 L628,285 L592,268 L572,248 Z"/>
-          <path d="M358,56 L372,52 L376,66 L365,70 Z"/>
-        </g>
-        {/* Grid */}
-        <g stroke="#1a2535" strokeWidth="0.3" opacity="0.5">
-          {[-60,-30,0,30,60].map(lat => {
-            const y = ((90-lat)/180)*400;
-            return <line key={`lat${lat}`} x1="0" y1={y} x2="800" y2={y}/>;
-          })}
-          {[-120,-60,0,60,120].map(lon => {
-            const x = ((lon+180)/360)*800;
-            return <line key={`lon${lon}`} x1={x} y1="0" x2={x} y2="400"/>;
-          })}
-        </g>
-        {/* Visitor dots */}
-        {(geo||[]).map((pt, i) => {
-          if (!pt?.lat || !pt?.lon) return null;
-          const {x,y} = project(pt.lat, pt.lon);
-          const fresh = Date.now() - pt.ts < 120_000;
-          return (
-            <g key={i}>
-              {fresh && (
-                <circle cx={x} cy={y} r="10" fill="#DC2626" opacity="0">
-                  <animate attributeName="r" values="3;14;3" dur="2.5s" repeatCount="indefinite"/>
-                  <animate attributeName="opacity" values="0.4;0;0.4" dur="2.5s" repeatCount="indefinite"/>
-                </circle>
-              )}
-              <circle cx={x} cy={y} r="3.5" fill="#DC2626" opacity="0.85">
-                <title>{pt.city}, {pt.country}</title>
-              </circle>
-            </g>
-          );
-        })}
-      </svg>
-    </div>
-  );
-}
 
 // ── Live stats section ────────────────────────────────────────────────────────
 function LiveStats() {
@@ -195,20 +138,15 @@ function LiveStats() {
             </div>
           </div>
 
-          {/* Right — world map (spans 2 cols) */}
+          {/* Right — Leaflet world map (spans 2 cols) */}
           <div className="lg:col-span-2 p-6 rounded-2xl border border-white/8 bg-[#111118] flex flex-col">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-xs text-gray-500 uppercase tracking-widest">Visitor Locations</p>
+              <p className="text-xs text-gray-500 uppercase tracking-widest font-semibold">Visitor Locations</p>
               <span className="text-xs text-gray-700">
-                {data.geo?.length || 0} points · hover for details
+                {data.geo?.length || 0} points · click for details
               </span>
             </div>
-            <div className="flex-1">
-              <MiniMap geo={data.geo} />
-            </div>
-            <p className="text-xs text-gray-700 mt-3">
-              Pulsing dots = visited in last 2 minutes
-            </p>
+            <VisitorMap geo={data.geo} height="340px" />
           </div>
         </div>
 
