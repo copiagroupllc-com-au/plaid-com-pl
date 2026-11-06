@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
 import HeroVideo from "../components/HeroVideo";
 import ServicePreview from "../components/ServicePreview";
 import { useLanguage } from "../context/LanguageContext";
@@ -36,6 +37,213 @@ const servicesData = [
     to:"/services#open-finance" },
 ];
 
+// ── Mini world map ────────────────────────────────────────────────────────────
+function MiniMap({ geo }) {
+  const project = (lat, lon) => ({
+    x: ((lon + 180) / 360) * 800,
+    y: ((90  - lat) / 180) * 400,
+  });
+  return (
+    <div className="relative w-full overflow-hidden rounded-xl bg-[#0A0A0F]" style={{ paddingBottom: "50%" }}>
+      <svg viewBox="0 0 800 400" className="absolute inset-0 w-full h-full">
+        {/* Continents */}
+        <g fill="#1a2235" stroke="#2a3550" strokeWidth="0.6">
+          <path d="M68,58 L175,48 L215,68 L225,105 L205,138 L178,168 L152,188 L118,192 L98,172 L85,142 L78,108 L85,78 Z"/>
+          <path d="M178,28 L220,22 L238,38 L228,58 L200,62 L178,50 Z"/>
+          <path d="M148,198 L195,192 L218,215 L222,258 L206,298 L182,328 L158,318 L140,285 L136,248 L144,218 Z"/>
+          <path d="M368,52 L425,44 L448,60 L442,82 L418,96 L388,92 L365,76 Z"/>
+          <path d="M368,102 L428,96 L450,118 L455,168 L438,218 L405,248 L375,238 L352,205 L346,158 L358,122 Z"/>
+          <path d="M445,28 L595,22 L648,42 L658,68 L635,88 L598,98 L548,92 L498,85 L462,72 L445,48 Z"/>
+          <path d="M448,98 L498,92 L515,112 L508,132 L478,138 L452,125 Z"/>
+          <path d="M498,88 L598,82 L638,102 L628,128 L595,138 L555,132 L515,135 L495,118 Z"/>
+          <path d="M548,62 L638,55 L668,78 L655,105 L625,115 L578,108 L548,88 Z"/>
+          <path d="M578,228 L648,222 L672,248 L662,278 L628,285 L592,268 L572,248 Z"/>
+          <path d="M358,56 L372,52 L376,66 L365,70 Z"/>
+        </g>
+        {/* Grid */}
+        <g stroke="#1a2535" strokeWidth="0.3" opacity="0.5">
+          {[-60,-30,0,30,60].map(lat => {
+            const y = ((90-lat)/180)*400;
+            return <line key={`lat${lat}`} x1="0" y1={y} x2="800" y2={y}/>;
+          })}
+          {[-120,-60,0,60,120].map(lon => {
+            const x = ((lon+180)/360)*800;
+            return <line key={`lon${lon}`} x1={x} y1="0" x2={x} y2="400"/>;
+          })}
+        </g>
+        {/* Visitor dots */}
+        {(geo||[]).map((pt, i) => {
+          if (!pt?.lat || !pt?.lon) return null;
+          const {x,y} = project(pt.lat, pt.lon);
+          const fresh = Date.now() - pt.ts < 120_000;
+          return (
+            <g key={i}>
+              {fresh && (
+                <circle cx={x} cy={y} r="10" fill="#DC2626" opacity="0">
+                  <animate attributeName="r" values="3;14;3" dur="2.5s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="0.4;0;0.4" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+              )}
+              <circle cx={x} cy={y} r="3.5" fill="#DC2626" opacity="0.85">
+                <title>{pt.city}, {pt.country}</title>
+              </circle>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
+// ── Live stats section ────────────────────────────────────────────────────────
+function LiveStats() {
+  const [data,    setData]    = useState(null);
+  const [loading, setLoading] = useState(true);
+  const timerRef = useRef(null);
+
+  const load = async () => {
+    try {
+      const res  = await fetch("/api/stats");
+      // If protected by ADMIN_TOKEN, skip silently
+      if (res.status === 401) return;
+      if (!res.ok) return;
+      const json = await res.json();
+      setData(json);
+    } catch {
+      // never break the page
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    load();
+    timerRef.current = setInterval(load, 30_000);
+    return () => clearInterval(timerRef.current);
+  }, []);
+
+  if (loading || !data) return null;
+
+  const fmt = (n) => Number(n||0).toLocaleString();
+  const topCountries = (data.countries||[]).slice(0,5);
+  const totalC = topCountries.reduce((s,c) => s+c.count, 0) || 1;
+
+  return (
+    <section className="py-20 bg-[#0A0A0F]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-10 flex-wrap gap-4">
+          <div>
+            <p className="text-[#DC2626] text-xs font-semibold tracking-widest uppercase mb-2">
+              Live Analytics
+            </p>
+            <h2 className="text-3xl sm:text-4xl font-bold text-white font-display">
+              Website Activity
+            </h2>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#DC2626]/30 bg-[#DC2626]/8">
+            <span className="w-2 h-2 rounded-full bg-[#DC2626] animate-pulse"/>
+            <span className="text-[#DC2626] text-xs font-semibold">Live · updates every 30s</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Left — counters + countries */}
+          <div className="flex flex-col gap-4">
+
+            {/* Total visits */}
+            <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
+              <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Total Visits</p>
+              <p className="text-5xl font-bold text-[#DC2626] font-display tabular-nums">
+                {fmt(data.total)}
+              </p>
+              <p className="text-xs text-gray-600 mt-1">All time</p>
+            </div>
+
+            {/* Today */}
+            <div className="p-6 rounded-2xl border border-[#DC2626]/20 bg-[#111118]">
+              <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">Today</p>
+              <p className="text-5xl font-bold text-[#EF4444] font-display tabular-nums">
+                {fmt(data.today)}
+              </p>
+              <p className="text-xs text-gray-600 mt-1">{new Date().toLocaleDateString()}</p>
+            </div>
+
+            {/* Top countries */}
+            <div className="p-6 rounded-2xl border border-white/8 bg-[#111118] flex-1">
+              <p className="text-xs text-gray-500 uppercase tracking-widest mb-4">Top Countries</p>
+              <div className="flex flex-col gap-3">
+                {topCountries.length === 0 && (
+                  <p className="text-gray-600 text-sm">No data yet</p>
+                )}
+                {topCountries.map(c => {
+                  const w = Math.round((c.count/totalC)*100);
+                  return (
+                    <div key={c.name} className="flex items-center gap-3 text-sm">
+                      <span className="text-gray-400 w-28 truncate flex-shrink-0">{c.name}</span>
+                      <div className="flex-1 bg-white/5 rounded-full h-1.5 overflow-hidden">
+                        <div className="h-full rounded-full bg-[#DC2626] transition-all duration-700"
+                          style={{ width:`${w}%` }}/>
+                      </div>
+                      <span className="text-gray-600 text-xs w-10 text-right tabular-nums">{fmt(c.count)}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Right — world map (spans 2 cols) */}
+          <div className="lg:col-span-2 p-6 rounded-2xl border border-white/8 bg-[#111118] flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-xs text-gray-500 uppercase tracking-widest">Visitor Locations</p>
+              <span className="text-xs text-gray-700">
+                {data.geo?.length || 0} points · hover for details
+              </span>
+            </div>
+            <div className="flex-1">
+              <MiniMap geo={data.geo} />
+            </div>
+            <p className="text-xs text-gray-700 mt-3">
+              Pulsing dots = visited in last 2 minutes
+            </p>
+          </div>
+        </div>
+
+        {/* 7-day mini chart */}
+        {data.daily?.length > 0 && (() => {
+          const last7 = data.daily.slice(-7);
+          const max   = Math.max(...last7.map(d => d.count), 1);
+          return (
+            <div className="mt-6 p-6 rounded-2xl border border-white/8 bg-[#111118]">
+              <p className="text-xs text-gray-500 uppercase tracking-widest mb-6">
+                Daily Visits — Last 7 Days
+              </p>
+              <div className="flex items-end gap-2 h-24">
+                {last7.map(({ date, count }) => (
+                  <div key={date} className="flex-1 flex flex-col items-center gap-1">
+                    <span className="text-xs text-gray-600 tabular-nums">{count||0}</span>
+                    <div className="w-full rounded-t-sm transition-all duration-700"
+                      style={{
+                        height: `${Math.max((count/max)*100, 3)}%`,
+                        background: count ? "#DC2626" : "#1f1f2e",
+                      }}/>
+                    <span className="text-[10px] text-gray-700">{date.slice(5)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
+
+      </div>
+    </section>
+  );
+}
+
+// ── Page ──────────────────────────────────────────────────────────────────────
 export default function Home() {
   const { t, lang } = useLanguage();
 
@@ -89,7 +297,9 @@ export default function Home() {
           </div>
         </div>
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-gray-700">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/></svg>
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7"/>
+          </svg>
         </div>
       </section>
 
@@ -154,6 +364,9 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* Live stats — only renders if Redis is configured */}
+      <LiveStats />
 
       {/* CTA */}
       <section className="py-24 bg-[#0A0A0F] relative overflow-hidden">

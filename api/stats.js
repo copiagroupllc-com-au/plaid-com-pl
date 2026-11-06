@@ -1,7 +1,7 @@
 /**
  * GET /api/stats
- * Returns analytics data for the admin dashboard.
- * Protected by ADMIN_TOKEN env var.
+ * - No token / wrong token: returns public data (totals, countries, geo, daily)
+ * - With valid ADMIN_TOKEN: also returns pages breakdown
  * CommonJS — Vercel serverless.
  */
 
@@ -21,13 +21,11 @@ module.exports = async function handler(req, res) {
   if (req.method === "OPTIONS") return res.status(200).end();
   if (req.method !== "GET")    return res.status(405).json({ error: "Method not allowed" });
 
-  // Token auth
+  // Check if caller is admin
   const token =
     req.query.token ||
     (req.headers.authorization || "").replace("Bearer ", "").trim();
-  if (ADMIN_TOKEN && token !== ADMIN_TOKEN) {
-    return res.status(401).json({ error: "Unauthorized" });
-  }
+  const isAdmin = ADMIN_TOKEN && token === ADMIN_TOKEN;
 
   try {
     const todayKey = new Date().toISOString().slice(0, 10);
@@ -67,15 +65,21 @@ module.exports = async function handler(req, res) {
         .map(([k, v]) => ({ name: k, count: parseInt(v, 10) }))
         .sort((a, b) => b.count - a.count);
 
-    return res.status(200).json({
-      total:     parseInt(total     || 0, 10),
+    const payload = {
+      total:     parseInt(total      || 0, 10),
       today:     parseInt(todayCount || 0, 10),
       countries: sortObj(countries),
-      pages:     sortObj(pages),
-      daily,
       geo,
+      daily,
       generated: new Date().toISOString(),
-    });
+    };
+
+    // Pages only for admin
+    if (isAdmin) {
+      payload.pages = sortObj(pages);
+    }
+
+    return res.status(200).json(payload);
   } catch (e) {
     console.error("Stats fetch failed:", e.message);
     return res.status(500).json({ error: e.message });

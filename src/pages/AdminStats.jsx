@@ -1,12 +1,13 @@
 import { useState, useEffect, useCallback } from "react";
 
-const REFRESH_MS = 15_000;
+const REFRESH_MS = 15_000; // auto-refresh every 15 seconds
 
-const fmt = (n) => Number(n || 0).toLocaleString();
-const pct = (n, total) => total ? Math.round((n / total) * 100) : 0;
-const ago = (ts) => {
+// ── tiny helpers ─────────────────────────────────────────────────────────────
+const fmt  = (n) => Number(n || 0).toLocaleString();
+const pct  = (n, total) => total ? Math.round((n / total) * 100) : 0;
+const ago  = (ts) => {
   const s = Math.floor((Date.now() - ts) / 1000);
-  if (s < 60)   return `${s}s ago`;
+  if (s < 60)  return `${s}s ago`;
   if (s < 3600) return `${Math.floor(s / 60)}m ago`;
   return `${Math.floor(s / 3600)}h ago`;
 };
@@ -22,7 +23,7 @@ function Card({ label, value, sub, accent = "#DC2626" }) {
   );
 }
 
-// ── Bar row ───────────────────────────────────────────────────────────────────
+// ── Bar chart row ─────────────────────────────────────────────────────────────
 function BarRow({ name, count, total, accent = "#DC2626" }) {
   const w = pct(count, total);
   return (
@@ -32,9 +33,7 @@ function BarRow({ name, count, total, accent = "#DC2626" }) {
         <div className="h-full rounded-full transition-all duration-500"
           style={{ width: `${w}%`, background: accent }} />
       </div>
-      <span className="text-gray-500 w-20 text-right flex-shrink-0 tabular-nums">
-        {fmt(count)} ({w}%)
-      </span>
+      <span className="text-gray-500 w-16 text-right flex-shrink-0">{fmt(count)} ({w}%)</span>
     </div>
   );
 }
@@ -42,26 +41,23 @@ function BarRow({ name, count, total, accent = "#DC2626" }) {
 // ── Daily bar chart ───────────────────────────────────────────────────────────
 function DailyChart({ daily }) {
   if (!daily?.length) return null;
+  const max = Math.max(...daily.map(d => d.count), 1);
   const last7 = daily.slice(-7);
-  const max   = Math.max(...last7.map(d => d.count), 1);
   return (
     <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
-      <h3 className="text-sm font-semibold text-white mb-6 uppercase tracking-widest">
-        Visits — Last 7 Days
-      </h3>
-      <div className="flex items-end gap-2 h-36">
+      <h3 className="text-sm font-semibold text-white mb-6 uppercase tracking-widest">Last 7 Days</h3>
+      <div className="flex items-end gap-2 h-32">
         {last7.map(({ date, count }) => (
           <div key={date} className="flex-1 flex flex-col items-center gap-1">
-            <span className="text-xs text-gray-500 tabular-nums">{count || 0}</span>
-            <div
-              className="w-full rounded-t-md transition-all duration-500"
+            <span className="text-xs text-gray-600">{count || 0}</span>
+            <div className="w-full rounded-t-md transition-all duration-500"
               style={{
-                height: `${Math.max((count / max) * 100, 3)}%`,
-                background: count ? "#DC2626" : "#1f1f2e",
-              }}
-            />
+                height: `${Math.max((count / max) * 100, 4)}%`,
+                background: "#DC2626",
+                opacity: count ? 1 : 0.15,
+              }} />
             <span className="text-[10px] text-gray-600 whitespace-nowrap">
-              {date.slice(5)}
+              {date.slice(5)} {/* MM-DD */}
             </span>
           </div>
         ))}
@@ -70,8 +66,10 @@ function DailyChart({ daily }) {
   );
 }
 
-// ── World map (SVG equirectangular) ───────────────────────────────────────────
+// ── World Map (SVG Mercator projection) ───────────────────────────────────────
+// Simple equirectangular projection using a minimal world SVG path
 function WorldMap({ geo }) {
+  // Convert lat/lon to SVG coordinates (800×400 canvas)
   const project = (lat, lon) => ({
     x: ((lon + 180) / 360) * 800,
     y: ((90  - lat) / 180) * 400,
@@ -81,59 +79,41 @@ function WorldMap({ geo }) {
     <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
       <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-widest">
         Visitor Locations
-        <span className="ml-2 text-gray-600 font-normal normal-case text-xs">
-          ({geo?.length || 0} points)
-        </span>
+        <span className="ml-2 text-gray-600 font-normal normal-case">({geo?.length || 0} points)</span>
       </h3>
-      <div
-        className="relative w-full overflow-hidden rounded-xl"
-        style={{ paddingBottom: "50%", background: "#0D1117" }}
-      >
+      <div className="relative w-full overflow-hidden rounded-xl bg-[#0A0A0F]" style={{ paddingBottom: "50%" }}>
         <svg
           viewBox="0 0 800 400"
           className="absolute inset-0 w-full h-full"
+          style={{ background: "#0D1117" }}
         >
-          {/* Continent fills */}
-          <g fill="#1a2235" stroke="#2a3550" strokeWidth="0.6">
+          {/* Simple world outline — approximate continent shapes */}
+          <g fill="#1e2433" stroke="#2a3347" strokeWidth="0.5">
             {/* North America */}
-            <path d="M68,58 L175,48 L215,68 L225,105 L205,138 L178,168 L152,188 L118,192 L98,172 L85,142 L78,108 L85,78 Z"/>
-            {/* Greenland */}
-            <path d="M178,28 L220,22 L238,38 L228,58 L200,62 L178,50 Z"/>
+            <path d="M120,60 L180,55 L210,70 L220,100 L200,130 L180,160 L160,180 L130,190 L110,170 L100,140 L90,110 L100,80 Z"/>
             {/* South America */}
-            <path d="M148,198 L195,192 L218,215 L222,258 L206,298 L182,328 L158,318 L140,285 L136,248 L144,218 Z"/>
+            <path d="M155,195 L190,190 L210,210 L215,250 L200,290 L180,320 L160,310 L145,280 L140,240 L148,210 Z"/>
             {/* Europe */}
-            <path d="M368,52 L425,44 L448,60 L442,82 L418,96 L388,92 L365,76 Z"/>
+            <path d="M370,55 L420,50 L440,65 L430,85 L410,95 L385,90 L365,75 Z"/>
             {/* Africa */}
-            <path d="M368,102 L428,96 L450,118 L455,168 L438,218 L405,248 L375,238 L352,205 L346,158 L358,122 Z"/>
-            {/* Russia / North Asia */}
-            <path d="M445,28 L595,22 L648,42 L658,68 L635,88 L598,98 L548,92 L498,85 L462,72 L445,48 Z"/>
-            {/* Middle East */}
-            <path d="M448,98 L498,92 L515,112 L508,132 L478,138 L452,125 Z"/>
-            {/* South / SE Asia */}
-            <path d="M498,88 L598,82 L638,102 L628,128 L595,138 L555,132 L515,135 L495,118 Z"/>
-            {/* China / East Asia */}
-            <path d="M548,62 L638,55 L668,78 L655,105 L625,115 L578,108 L548,88 Z"/>
-            {/* Japan */}
-            <path d="M652,72 L668,68 L672,85 L658,92 L648,82 Z"/>
+            <path d="M375,100 L420,95 L440,115 L445,160 L430,210 L400,240 L375,230 L355,200 L350,155 L360,120 Z"/>
+            {/* Asia */}
+            <path d="M440,45 L560,40 L620,60 L640,90 L620,115 L580,120 L540,110 L500,120 L470,105 L445,85 L440,65 Z"/>
             {/* Australia */}
-            <path d="M578,228 L648,222 L672,248 L662,278 L628,285 L592,268 L572,248 Z"/>
-            {/* New Zealand */}
-            <path d="M688,268 L698,258 L705,272 L698,285 L688,280 Z"/>
-            {/* UK / Ireland */}
-            <path d="M358,56 L372,52 L376,66 L365,70 Z"/>
-            {/* Iceland */}
-            <path d="M318,38 L335,34 L340,46 L328,50 Z"/>
+            <path d="M580,220 L640,215 L660,240 L650,270 L620,275 L590,260 L575,240 Z"/>
+            {/* UK/Ireland rough */}
+            <path d="M365,58 L375,55 L378,68 L368,70 Z"/>
           </g>
 
           {/* Grid lines */}
-          <g stroke="#1a2535" strokeWidth="0.4" opacity="0.6">
-            {[-60, -30, 0, 30, 60].map(lat => {
+          <g stroke="#1a2030" strokeWidth="0.3" opacity="0.5">
+            {[-60,-30,0,30,60].map(lat => {
               const y = ((90 - lat) / 180) * 400;
-              return <line key={`lat${lat}`} x1="0" y1={y} x2="800" y2={y} />;
+              return <line key={lat} x1="0" y1={y} x2="800" y2={y}/>;
             })}
-            {[-120, -60, 0, 60, 120].map(lon => {
+            {[-120,-60,0,60,120].map(lon => {
               const x = ((lon + 180) / 360) * 800;
-              return <line key={`lon${lon}`} x1={x} y1="0" x2={x} y2="400" />;
+              return <line key={lon} x1={x} y1="0" x2={x} y2="400"/>;
             })}
           </g>
 
@@ -141,16 +121,16 @@ function WorldMap({ geo }) {
           {(geo || []).map((point, i) => {
             if (!point?.lat || !point?.lon) return null;
             const { x, y } = project(point.lat, point.lon);
-            const isRecent = Date.now() - point.ts < 120_000;
+            const isRecent = Date.now() - point.ts < 60_000;
             return (
               <g key={i}>
                 {isRecent && (
-                  <circle cx={x} cy={y} r="10" fill="#DC2626" opacity="0">
-                    <animate attributeName="r"       values="4;14;4"   dur="2.5s" repeatCount="indefinite"/>
-                    <animate attributeName="opacity" values="0.4;0;0.4" dur="2.5s" repeatCount="indefinite"/>
+                  <circle cx={x} cy={y} r="8" fill="#DC2626" opacity="0.3">
+                    <animate attributeName="r" values="4;12;4" dur="2s" repeatCount="indefinite"/>
+                    <animate attributeName="opacity" values="0.5;0;0.5" dur="2s" repeatCount="indefinite"/>
                   </circle>
                 )}
-                <circle cx={x} cy={y} r="3.5" fill="#DC2626" opacity="0.9">
+                <circle cx={x} cy={y} r="3" fill="#DC2626" opacity="0.85">
                   <title>{point.city}, {point.country}</title>
                 </circle>
               </g>
@@ -158,9 +138,49 @@ function WorldMap({ geo }) {
           })}
         </svg>
       </div>
-      <p className="text-xs text-gray-700 mt-3">
-        Hover a dot to see location · Pulsing = visited in last 2 minutes
-      </p>
+      <p className="text-xs text-gray-700 mt-3">Hover a dot to see location. Pulsing = visited in last 60s.</p>
+    </div>
+  );
+}
+
+// ── Recent visitors table ─────────────────────────────────────────────────────
+function RecentTable({ recent }) {
+  return (
+    <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
+      <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-widest">
+        Recent Visitors <span className="text-gray-600 font-normal normal-case ml-1">(last 50)</span>
+      </h3>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="text-gray-600 border-b border-white/8">
+              <th className="text-left pb-3 pr-4 font-medium">Time</th>
+              <th className="text-left pb-3 pr-4 font-medium">Page</th>
+              <th className="text-left pb-3 pr-4 font-medium">Location</th>
+              <th className="text-left pb-3 pr-4 font-medium">Browser</th>
+              <th className="text-left pb-3 pr-4 font-medium">Device</th>
+              <th className="text-left pb-3 font-medium">IP</th>
+            </tr>
+          </thead>
+          <tbody>
+            {(recent || []).map((v, i) => (
+              <tr key={i} className="border-b border-white/5 hover:bg-white/3 transition-colors">
+                <td className="py-2.5 pr-4 text-gray-500 whitespace-nowrap">{v.ts ? ago(v.ts) : "—"}</td>
+                <td className="py-2.5 pr-4 text-gray-300 whitespace-nowrap max-w-[120px] truncate">{v.page || "/"}</td>
+                <td className="py-2.5 pr-4 text-gray-400 whitespace-nowrap">{v.city || v.country || "—"}</td>
+                <td className="py-2.5 pr-4 text-gray-400">{v.browser || "—"}</td>
+                <td className="py-2.5 pr-4 text-gray-400">{v.device || "—"}</td>
+                <td className="py-2.5 text-gray-600 font-mono">{v.ip || "—"}</td>
+              </tr>
+            ))}
+            {(!recent || recent.length === 0) && (
+              <tr>
+                <td colSpan="6" className="py-8 text-center text-gray-600">No visits recorded yet</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
@@ -178,8 +198,7 @@ export default function AdminStats() {
 
   const fetchStats = useCallback(async (t) => {
     try {
-      const tk  = t !== undefined ? t : token;
-      const res = await fetch(`/api/stats?token=${encodeURIComponent(tk)}`);
+      const res = await fetch(`/api/stats?token=${encodeURIComponent(t || token)}`);
       if (res.status === 401) { setAuthed(false); setError("Invalid token"); return; }
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = await res.json();
@@ -194,6 +213,7 @@ export default function AdminStats() {
     }
   }, [token]);
 
+  // Auto-refresh
   useEffect(() => {
     if (!authed) return;
     fetchStats();
@@ -248,6 +268,7 @@ export default function AdminStats() {
     );
   }
 
+  // ── Loading ─────────────────────────────────────────────────────────────────
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center">
@@ -259,39 +280,34 @@ export default function AdminStats() {
     );
   }
 
-  const totalCountries = data?.countries?.reduce((s, c) => s + c.count, 0) || 1;
-  const totalPages     = data?.pages?.reduce((s, p) => s + p.count, 0)     || 1;
+  const totalBrowsers  = data?.browsers?.reduce((s, b) => s + b.count, 0) || 1;
+  const totalOS        = data?.os?.reduce((s, o) => s + o.count, 0)       || 1;
+  const totalDevices   = data?.devices?.reduce((s, d) => s + d.count, 0)  || 1;
+  const totalCountries = data?.countries?.reduce((s, c) => s + c.count, 0)|| 1;
 
   return (
     <div className="bg-[#0A0A0F] text-white min-h-screen">
 
-      {/* Sticky header */}
+      {/* Header */}
       <div className="border-b border-white/8 bg-[#111118]/90 sticky top-0 z-10 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4
-                        flex items-center justify-between gap-4 flex-wrap">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center justify-between gap-4 flex-wrap">
           <div>
             <h1 className="text-lg font-bold text-white font-display">Analytics Dashboard</h1>
             <p className="text-xs text-gray-600">
               {lastUpdate ? `Updated ${ago(lastUpdate.getTime())}` : ""}
-              {lastUpdate && data?.generated
-                ? ` · ${new Date(data.generated).toLocaleTimeString()}`
-                : ""}
+              {" · "}
+              <span className="text-gray-500">{data?.generated ? new Date(data.generated).toLocaleTimeString() : ""}</span>
             </p>
           </div>
           <div className="flex items-center gap-3">
-            {/* Live toggle */}
             <button
-              onClick={() => setLive(l => !l)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold
-                          border transition-all ${
-                live
-                  ? "border-[#DC2626]/50 text-[#DC2626] bg-[#DC2626]/10"
-                  : "border-white/10 text-gray-500"
+              onClick={() => { setLive(l => !l); }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold border transition-all ${
+                live ? "border-[#DC2626]/50 text-[#DC2626] bg-[#DC2626]/10" : "border-white/10 text-gray-500"
               }`}>
               <span className={`w-2 h-2 rounded-full ${live ? "bg-[#DC2626] animate-pulse" : "bg-gray-600"}`}/>
-              {live ? `Live (${REFRESH_MS / 1000}s)` : "Paused"}
+              {live ? "Live" : "Paused"}
             </button>
-            {/* Manual refresh */}
             <button
               onClick={() => fetchStats()}
               className="px-4 py-2 rounded-full border border-white/10 text-gray-400 text-xs
@@ -302,13 +318,8 @@ export default function AdminStats() {
               </svg>
               Refresh
             </button>
-            {/* Sign out */}
             <button
-              onClick={() => {
-                sessionStorage.removeItem("admin_token");
-                setAuthed(false);
-                setToken("");
-              }}
+              onClick={() => { sessionStorage.removeItem("admin_token"); setAuthed(false); setToken(""); }}
               className="px-4 py-2 rounded-full border border-white/10 text-gray-500 text-xs
                          hover:border-red-500/30 hover:text-red-400 transition-all">
               Sign out
@@ -317,15 +328,14 @@ export default function AdminStats() {
         </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col gap-8">
 
-        {/* Top cards */}
+        {/* Top stat cards */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <Card label="Total Visits"    value={fmt(data?.total)}            accent="#DC2626" sub="All time" />
-          <Card label="Today"           value={fmt(data?.today)}            accent="#EF4444" sub={new Date().toLocaleDateString()} />
-          <Card label="Countries"       value={fmt(data?.countries?.length)} accent="#F59E0B" sub="Unique countries" />
-          <Card label="Pages Tracked"   value={fmt(data?.pages?.length)}    accent="#10B981" sub="Unique pages" />
+          <Card label="Total Visits"   value={fmt(data?.total)}   accent="#DC2626" sub="All time" />
+          <Card label="Today"          value={fmt(data?.today)}   accent="#EF4444" sub={new Date().toLocaleDateString()} />
+          <Card label="Countries"      value={fmt(data?.countries?.length)} accent="#F59E0B" sub="Unique countries" />
+          <Card label="Unique Pages"   value={fmt(data?.pages?.length)}    accent="#10B981" sub="Pages visited" />
         </div>
 
         {/* World map */}
@@ -334,41 +344,72 @@ export default function AdminStats() {
         {/* Daily chart */}
         <DailyChart daily={data?.daily} />
 
-        {/* Countries + Pages side by side */}
+        {/* Breakdowns */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+          {/* Browsers */}
           <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
-            <h3 className="text-sm font-semibold text-white mb-5 uppercase tracking-widest">
-              Top Countries
-            </h3>
+            <h3 className="text-sm font-semibold text-white mb-5 uppercase tracking-widest">Browsers</h3>
             <div className="flex flex-col gap-3">
-              {(data?.countries || []).slice(0, 10).map(c => (
-                <BarRow key={c.name} name={c.name} count={c.count}
-                  total={totalCountries} accent="#F59E0B" />
+              {(data?.browsers || []).slice(0, 8).map(b => (
+                <BarRow key={b.name} name={b.name} count={b.count} total={totalBrowsers} accent="#DC2626" />
               ))}
-              {!data?.countries?.length &&
-                <p className="text-gray-600 text-sm">No visits recorded yet</p>}
+              {!data?.browsers?.length && <p className="text-gray-600 text-sm">No data yet</p>}
             </div>
           </div>
 
+          {/* Operating Systems */}
           <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
-            <h3 className="text-sm font-semibold text-white mb-5 uppercase tracking-widest">
-              Top Pages
-            </h3>
+            <h3 className="text-sm font-semibold text-white mb-5 uppercase tracking-widest">Operating Systems</h3>
             <div className="flex flex-col gap-3">
-              {(data?.pages || []).slice(0, 10).map(p => (
-                <BarRow key={p.name} name={p.name} count={p.count}
-                  total={totalPages} accent="#8B5CF6" />
+              {(data?.os || []).slice(0, 8).map(o => (
+                <BarRow key={o.name} name={o.name} count={o.count} total={totalOS} accent="#EF4444" />
               ))}
-              {!data?.pages?.length &&
-                <p className="text-gray-600 text-sm">No visits recorded yet</p>}
+              {!data?.os?.length && <p className="text-gray-600 text-sm">No data yet</p>}
+            </div>
+          </div>
+
+          {/* Devices */}
+          <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
+            <h3 className="text-sm font-semibold text-white mb-5 uppercase tracking-widest">Devices</h3>
+            <div className="flex flex-col gap-3">
+              {(data?.devices || []).map(d => (
+                <BarRow key={d.name} name={d.name} count={d.count} total={totalDevices} accent="#F59E0B" />
+              ))}
+              {!data?.devices?.length && <p className="text-gray-600 text-sm">No data yet</p>}
+            </div>
+          </div>
+
+          {/* Top Countries */}
+          <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
+            <h3 className="text-sm font-semibold text-white mb-5 uppercase tracking-widest">Top Countries</h3>
+            <div className="flex flex-col gap-3">
+              {(data?.countries || []).slice(0, 8).map(c => (
+                <BarRow key={c.name} name={c.name} count={c.count} total={totalCountries} accent="#10B981" />
+              ))}
+              {!data?.countries?.length && <p className="text-gray-600 text-sm">No data yet</p>}
             </div>
           </div>
 
         </div>
 
+        {/* Top Pages */}
+        <div className="p-6 rounded-2xl border border-white/8 bg-[#111118]">
+          <h3 className="text-sm font-semibold text-white mb-5 uppercase tracking-widest">Top Pages</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {(data?.pages || []).slice(0, 12).map(p => (
+              <BarRow key={p.name} name={p.name} count={p.count}
+                total={data?.pages?.reduce((s, x) => s + x.count, 0) || 1} accent="#8B5CF6" />
+            ))}
+            {!data?.pages?.length && <p className="text-gray-600 text-sm">No data yet</p>}
+          </div>
+        </div>
+
+        {/* Recent visitors */}
+        <RecentTable recent={data?.recent} />
+
         <p className="text-center text-xs text-gray-700 pb-8">
-          Auto-refreshes every {REFRESH_MS / 1000}s · Powered by Upstash Redis
+          Auto-refreshes every {REFRESH_MS / 1000}s · Data from Upstash Redis
         </p>
       </div>
     </div>

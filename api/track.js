@@ -9,12 +9,13 @@ const { Redis } = require("@upstash/redis");
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const CHAT_ID   = process.env.TELEGRAM_CHAT_ID;
 
+// Upstash Redis client — uses REST, works in serverless
 const redis = new Redis({
   url:   process.env.UPSTASH_REDIS_REST_URL,
   token: process.env.UPSTASH_REDIS_REST_TOKEN,
 });
 
-// Rate limiter: 1 Telegram notification per IP per 60s
+// In-memory rate limiter: 1 Telegram notification per IP per 60s
 const seen = new Map();
 const RATE_MS = 60_000;
 function isRateLimited(ip) {
@@ -51,7 +52,15 @@ module.exports = async function handler(req, res) {
   const ip =
     (req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "Unknown";
 
-  const { page = "/", referrer = "" } = req.body || {};
+  const {
+    browser  = "Unknown",
+    os       = "Unknown",
+    device   = "Unknown",
+    language = "Unknown",
+    page     = "/",
+    referrer = "",
+    screen   = "",
+  } = req.body || {};
 
   // Geo lookup
   let country = "Unknown", region = "Unknown", city = "Unknown";
@@ -72,37 +81,78 @@ module.exports = async function handler(req, res) {
     console.warn("Geo lookup failed:", e.message);
   }
 
-  const now      = Date.now();
-  const todayKey = new Date().toISOString().slice(0, 10);
+  const now       = Date.now();
+  const todayKey  = new Date().toISOString().slice(0, 10); // "2026-10-12"
 
-  // Store in Redis
+  // ── Store in Redis ────────────────────────────────────────────────────────
   try {
+    const visit = {
+      ip, browser, os, device, language,
+      page, referrer, screen,
+      country, region, city, lat, lon,
+      ts: now,
+    };
+
     const pipeline = redis.pipeline();
+
+    // Total visit counter
     pipeline.incr("stats:total");
+
+    // Today's visit counter
     pipeline.incr(`stats:daily:${todayKey}`);
-    pipeline.expire(`stats:daily:${todayKey}`, 60 * 60 * 24 * 90);
+    pipeline.expire(`stats:daily:${todayKey}`, 60 * 60 * 24 * 90); // keep 90 days
+
+    // Browser breakdown
+    pipeline.hincrby("stats:browsers", browser, 1);
+
+    // OS breakdown
+    pipeline.hincrby("stats:os", os, 1);
+
+    // Device breakdown
+    pipeline.hincrby("stats:devices", device, 1);
+
+    // Country breakdown
     pipeline.hincrby("stats:countries", country, 1);
+
+    // Page breakdown
     pipeline.hincrby("stats:pages", page, 1);
+
+    // Recent visits list (keep last 100)
+    pipeline.lpush("stats:recent", JSON.stringify(visit));
+    pipeline.ltrim("stats:recent", 0, 99);
+
+    // Geo points for world map (keep last 500)
     if (lat && lon) {
       pipeline.lpush("stats:geo", JSON.stringify({ lat, lon, country, city, ts: now }));
       pipeline.ltrim("stats:geo", 0, 499);
     }
+
+    // Daily totals sorted set (for chart)
+    pipeline.zadd("stats:daily_zset", { score: now, member: `${todayKey}:${now}` });
+
     await pipeline.exec();
   } catch (e) {
     console.error("Redis write failed:", e.message);
+    // Don't block — continue to Telegram
   }
 
-  // Telegram notification
+  // ── Telegram notification ─────────────────────────────────────────────────
   if (!isRateLimited(ip) && BOT_TOKEN && CHAT_ID) {
     const message =
       `🌐 <b>NEW WEBSITE VISITOR</b>\n\n` +
+      `🖥 <b>Browser:</b> ${browser}\n` +
+      `💻 <b>OS:</b> ${os}\n` +
+      `📱 <b>Device:</b> ${device}\n` +
       `🌍 <b>Country:</b> ${country}\n` +
       `📍 <b>Region:</b> ${region}\n` +
       `🏙 <b>City:</b> ${city}\n` +
       `🔗 <b>IP:</b> <code>${ip}</code>\n` +
       `📄 <b>Page:</b> ${page}\n` +
       (referrer ? `↩️ <b>Referrer:</b> ${referrer}\n` : "") +
+      (screen   ? `🖥 <b>Screen:</b> ${screen}\n`     : "") +
+      `🌐 <b>Language:</b> ${language}\n` +
       `⏰ <b>Time:</b> ${new Date(now).toUTCString()}`;
+
     try { await sendTelegram(message); } catch (e) {
       console.error("Telegram failed:", e.message);
     }
